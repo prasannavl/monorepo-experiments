@@ -1,0 +1,38 @@
+""" Module team repo """
+
+module(
+    name = "teams",
+    version = "0.1.0",
+)
+
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# deps rules
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.7.1", dev_dependency = True)
+
+bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "protobuf", version = "23.1", repo_name = "com_google_protobuf")
+
+# core lang rules
+bazel_dep(name = "rules_cc", version = "0.0.9")
+bazel_dep(name = "rules_rust", version = "0.47.1")
+bazel_dep(name = "rules_jsonnet", version = "0.6.0")
+
+# other lang rules
+bazel_dep(name = "aspect_rules_js", version = "2.0.0-rc6")
+
+# deps
+# repo_deps = use_extension("//eng/toolchain:repo_deps.bzl", "repo_deps")
+# use_repo(repo_deps, "llvm_project", "aspect_rules_deno")
+
+# http_archive(
+#     name = "aspect_rules_deno",
+#     sha256 = "cfda7aeb308082a4525f391b66e81d4f15bd05c3f0a5131e4645e74ea1e32760",
+#     strip_prefix = "rules_deno-0.3.0",
+#     url = "https://github.com/aspect-build/rules_deno/archive/refs/tags/v0.3.0.tar.gz",
+# )
+
+# deno_setup = use_extension("//eng/toolchain:deno.bzl", "deno_setup")
+# use_repo(deno_setup, "deno")

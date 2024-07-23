@@ -1,0 +1,13 @@
+# Bazel
+bazel/bazel-*
+bazel/.bazel/
+
+# Buck2
+buck/buck-out/
+
+# Just
+just/build
+just/out
+
+target
+node_modules
