@@ -1,0 +1,83 @@
+load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
+
+
+# Download LLVM source for Clang 18.1.0
+http_archive(
+    name = "llvm-project",
+    urls = ["https://github.com/llvm/llvm-project/archive/llvmorg-18.1.8/bolt-18.1.8.src.tar.gz"],
+    sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", 
+    strip_prefix = "llvm-project-llvmorg-18.1.8",
+)
+
+genrule(
+    name = "llvm_toolchain",
+    srcs = [":llvm_source"],
+    out = "llvm_build",
+    bash = """
+        mkdir -p $OUT/install
+        cd $OUT
+        cmake -G "Unix Makefiles" ../llvm-project/llvm \
+            -DLLVM_ENABLE_PROJECTS="clang;libcxx;libcxxabi;libunwind;openmp" \
+            -DCMAKE_INSTALL_PREFIX=$OUT/install \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DLLVM_BUILD_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
+            -DLIBCXXABI_USE_LLVM_UNWINDER=ON
+        make -j$(nproc) install
+    """,
+)
+
+# [genrule(
+#     name = f"llvm_{tool}",
+#     cmd = f"cp $(location :llvm_toolchain)/install/bin/{tool} $OUT",
+#     out = tool,
+# ) for tool in [
+#     "clang",
+#     "clang++",
+#     "llvm-ar",
+#     "llvm-as",
+#     "llvm-nm",
+#     "llvm-objdump",
+#     "llvm-ranlib",
+#     "llvm-strip",
+#     "llvm-objcopy",
+# ]]
+
+# cxx_toolchain(
+#     name = "clang_18_toolchain",
+#     c_compiler = ":llvm_clang",
+#     cxx_compiler = ":llvm_clang++",
+#     archiver = ":llvm_llvm-ar",
+#     archiver_type = "gnu",
+#     assembler = ":llvm_llvm-as",
+#     linker = ":llvm_clang++",
+#     linker_type = "gnu",
+#     nm = ":llvm_llvm-nm",
+#     objdump = ":llvm_llvm-objdump",
+#     ranlib = ":llvm_llvm-ranlib",
+#     strip = ":llvm_llvm-strip",
+#     objcopy_for_shared_library_interface = ":llvm_llvm-objcopy",
+#     shared_library_interface_type = "disabled",
+#     linker_flags = [
+#         "-L$(location :llvm_toolchain)/install/lib",
+#         "-Wl,-rpath,$(location :llvm_toolchain)/install/lib",
+#         "-static-libgcc",
+#         "-static-libstdc++",
+#         "-Wl,--whole-archive",
+#         "-lpthread",
+#         "-Wl,--no-whole-archive",
+#         "-lc++",
+#         "-lc++abi",
+#         "-lunwind",
+#         "-lomp"
+#     ],
+#     visibility = ["PUBLIC"],
+# )
+
+# toolchain_alias(
+#     name = "default_clang",
+#     actual = ":clang_18_toolchain",
+# )

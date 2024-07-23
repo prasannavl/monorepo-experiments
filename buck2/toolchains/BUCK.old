@@ -1,0 +1,130 @@
+load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
+load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
+load("@prelude//cxx:cxx_toolchain.bzl", "cxx_toolchain_inheriting_target_platform")
+
+system_python_bootstrap_toolchain(
+    name = "python_bootstrap",
+    visibility = ["PUBLIC"],
+)
+
+# system_cxx_toolchain(
+#     name = "cxx",
+#     visibility = ["PUBLIC"],
+# )
+
+system_genrule_toolchain(
+    name = "genrule",
+    visibility = ["PUBLIC"],
+)
+
+load("@prelude//toolchains/cxx/zig:defs.bzl", "download_zig_distribution", "cxx_zig_toolchain")
+
+# __zig_version = "0.11.0"
+
+# download_zig_distribution(
+#     name = "zig-x86_64-linux",
+#     version = __zig_version,
+#     arch = "x86_64",
+#     os = "linux",
+# )
+
+# download_zig_distribution(
+#     name = "zig-x86_64-macos",
+#     version = __zig_version,
+#     arch = "x86_64",
+#     os = "macos",
+# )
+
+# download_zig_distribution(
+#     name = "zig-x86_64-windows",
+#     version = __zig_version,
+#     arch = "x86_64",
+#     os = "windows",
+# )
+
+# alias(
+#     name = "zig",
+#     actual = select({
+#         "@prelude//os:linux": ":zig-x86_64-linux",
+#         "@prelude//os:macos": ":zig-x86_64-macos",
+#         "@prelude//os:windows": ":zig-x86_64-windows",
+#     }),
+# )
+
+# cxx_zig_toolchain(
+#     name = "cxx",
+#     distribution = ":zig",
+#     target = "x86_64-linux-gnu",
+#     visibility = ["PUBLIC"],
+# )
+
+# load("zig_toolchain.bzl", "zig_cxx_toolchain")
+
+# ZIG_VERSION = "0.10.1"
+
+# PLATFORMS = [
+#     "x86_64-unknown-linux-gnu",
+#     "aarch64-unknown-linux-gnu",
+#     "x86_64-pc-windows-gnu",
+#     "x86_64-apple-darwin",
+#     "arm64-apple-darwin",
+# ]
+
+# # Map Buck2 platform names to Zig distribution names
+# PLATFORM_MAPPING = {
+#     "x86_64-unknown-linux-gnu": "x86_64-linux",
+#     "aarch64-unknown-linux-gnu": "aarch64-linux",
+#     "x86_64-pc-windows-gnu": "x86_64-windows",
+#     "x86_64-apple-darwin": "x86_64-macos",
+#     "arm64-apple-darwin": "aarch64-macos",
+# }
+
+# # Download Zig distributions for all platforms
+# [download_zig_distribution(
+#     name = "zig_dist_{}".format(target),
+#     version = ZIG_VERSION,
+#     platform = PLATFORM_MAPPING[target],
+# ) for target in PLATFORMS]
+
+# # Create toolchains for all platforms
+# [zig_cxx_toolchain(
+#     name = "zig_toolchain_{}".format(target),
+#     target = target,
+#     zig_dist = ":zig_dist_{}".format(target),
+# ) for target in PLATFORMS]
+ 
+
+ZIG_VERSION = "0.11.0"
+
+# Download Zig distribution
+download_zig_distribution(
+    name = "zig_dist",
+    version = ZIG_VERSION,
+    # platform = "x86_64-linux",  # Adjust this based on your host system
+)
+
+
+# Define the Zig-based C++ toolchain
+cxx_toolchain_inheriting_target_platform(
+    name = "cxx",
+    visibility = ["PUBLIC"],
+    compiler_type = "clang",
+    linker_type = "gnu",
+    archiver_type = "gnu",  # Add this line
+    binary_extension = "",
+    compiler = "$(location :zig_dist)/zig cc",
+    compiler_flags = [
+        "-target", "x86_64-linux-gnu",  # Adjust this based on your target
+        "-fuse-ld=lld",
+    ],
+    linker = "$(location :zig_dist)/zig cc",
+    linker_flags = [
+        "-target", "x86_64-linux-gnu",  # Adjust this based on your target
+        "-fuse-ld=lld",
+    ],
+    archiver = "$(location :zig_dist)/zig ar",
+    archiver_flags = ["rcs"],
+    ranlib = "$(location :zig_dist)/zig ranlib",
+    strip = "$(location :zig_dist)/zig strip",
+)

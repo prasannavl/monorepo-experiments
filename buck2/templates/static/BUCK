@@ -1,0 +1,6 @@
+
+genrule(
+    name = "hello_world",
+    out = "out.txt",
+    cmd = "echo Hello world from Buck genrule> $OUT",
+)
