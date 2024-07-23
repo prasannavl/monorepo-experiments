@@ -1,0 +1,26 @@
+# We enforce strictness to all commands
+set shell := ["bash", "-Eeuo", "pipefail", "-c"]
+
+# We export a root cross libs can use this for internal paths relative to root. 
+# Do not overcomplicate parent scripts. Keep it simple, minimal and only
+# base items like core paths that'll fit well for all projects. 
+# THINK: May be XDG paths later if needed.
+export WORKSPACE_ROOT := justfile_directory()
+export WORKSPACE_BUILD := WORKSPACE_ROOT + "/build"
+export WORKSPACE_OUT := WORKSPACE_ROOT + "/out"
+
+mod eng
+
+default:
+    just --list
+
+list:
+    just --list --list-submodules
+
+echo_hello:
+    echo "Hello, world!"
+
+[no-cd]
+pwd:
+    echo pwd: $(pwd)
+    echo invocation_dir: {{invocation_directory()}}

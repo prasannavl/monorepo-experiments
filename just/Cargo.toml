@@ -1,0 +1,5 @@
+[workspace]
+members = ["eng/hello", "eng/world"]
+resolver = "2"
+
+[workspace.dependencies]
