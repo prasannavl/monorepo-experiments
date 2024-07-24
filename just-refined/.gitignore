@@ -1,0 +1,9 @@
+# build dirs
+
+/.build
+/.out
+
+# per project dirs commom
+
+target
+node_modules
